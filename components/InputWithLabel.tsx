@@ -3,17 +3,30 @@ import { cn } from "../lib/utils";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 
-// Define the props for InputWithLabel including ref forwarding
+// Define the props
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   inputClassName?: string;
   label?: string;
   helperText?: string;
   hasError?: boolean;
+  textarea?: boolean;
 }
 
-// Use forwardRef to pass the ref to the input
-export const InputWithLabel = forwardRef<HTMLInputElement, InputProps>(
-  ({ helperText, label, hasError, ...props }, ref) => {
+// Forward ref for both input and textarea
+export const InputWithLabel = forwardRef<
+  HTMLInputElement | HTMLTextAreaElement,
+  InputProps
+>(
+  (
+    { helperText, label, hasError, textarea = false, inputClassName, ...props },
+    ref
+  ) => {
+    const commonClasses = cn(
+      "w-full border p-2 rounded-md",
+      hasError ? "border-red-600" : "border-gray-300",
+      inputClassName
+    );
+
     return (
       <div className="w-full">
         {label && (
@@ -21,7 +34,17 @@ export const InputWithLabel = forwardRef<HTMLInputElement, InputProps>(
             {label}
           </Label>
         )}
-        <Input ref={ref} {...props} />
+
+        {textarea ? (
+          <textarea
+            ref={ref as React.Ref<HTMLTextAreaElement>}
+            className={commonClasses}
+            {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
+          />
+        ) : (
+          <Input ref={ref as React.Ref<HTMLInputElement>} {...props} />
+        )}
+
         {helperText && (
           <p
             className={cn(
@@ -37,5 +60,4 @@ export const InputWithLabel = forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
-// Set the display name for debugging purposes
 InputWithLabel.displayName = "InputWithLabel";
